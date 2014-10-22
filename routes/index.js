@@ -1,9 +1,12 @@
+"use script";
+
 var express = require('express');
 var router = express.Router();
 var async = require('async');
 
 
 var ddgScrapper = require('../lib/ddg-scrapper.js');
+var textExtracter = require('../lib/text-extracter.js');
 
 router.get('/', function(req, res, next) {
   if(!req.query.q) {
@@ -15,11 +18,10 @@ router.get('/', function(req, res, next) {
       cb(null, req.query.q);
     },
     ddgScrapper,
-    // textExtracter,
+    textExtracter,
     // rdfExtracter,
     // ???,
     function renderResults(results, cb) {
-      console.log(results);
       res.render('index', { query: req.query.q, results: results });
     }
   ], next);
