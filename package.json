@@ -19,7 +19,6 @@
     "sparql-client": "^0.1.0",
     "supertest": "^0.14.0",
     "unfluff": "^0.10.0",
-    "dbpedia-spotlight": "~0.5.27",
-    "n3": "~0.3.3"
+    "dbpedia-spotlight": "~0.5.27"
   }
 }
