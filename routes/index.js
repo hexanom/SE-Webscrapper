@@ -22,7 +22,11 @@ router.get('/', function(req, res, next) {
     textExtracter,
     function rdfEach(texts, next) {
       async.map(texts, function mapTexts(text, cb) {
-        rdfExtracter(text, cb);
+        if(text) {
+          rdfExtracter(text, cb);
+        } else {
+          cb(null, null);
+        }
       }, next);
     },
     // ???,
