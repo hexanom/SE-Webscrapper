@@ -7,6 +7,7 @@ var async = require('async');
 
 var ddgScrapper = require('../lib/ddg-scrapper.js');
 var textExtracter = require('../lib/text-extracter.js');
+var rdfExtracter = require('../lib/rdf-extracter.js');
 
 router.get('/', function(req, res, next) {
   if(!req.query.q) {
@@ -19,7 +20,11 @@ router.get('/', function(req, res, next) {
     },
     ddgScrapper,
     textExtracter,
-    // rdfExtracter,
+    function rdfEach(texts, next) {
+      async.map(texts, function mapTexts(text, cb) {
+        rdfExtracter(text, cb);
+      }, next);
+    },
     // ???,
     function renderResults(results, cb) {
       res.render('index', { query: req.query.q, results: results });
