@@ -1,0 +1,22 @@
+{
+  "name": "politics-navigator",
+  "version": "0.0.1",
+  "homepage": "https://github.com/hexanom/SE-Webscrapper",
+  "authors": [
+    "Robin Ricard <ricard.robin@gmail.com>"
+  ],
+  "description": "See the politics in a precise area",
+  "main": "index.html",
+  "moduleType": [
+    "globals"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
