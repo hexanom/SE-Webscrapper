@@ -23,7 +23,7 @@ router.get('/', function(req, res, next) {
       async.map(pages, function mapPages(page, cbMap) {
         async.waterfall([
           function getPage(cbGet) {
-            cbGet(null, pages);
+            cbGet(null, page);
           },
           textExtracter,
           rdfExtracter
