@@ -75,13 +75,35 @@ var Application = React.createClass({
   },
   queryMovie: function(uri) {
     sparqlQuery("select distinct ?Director where {" +
-                "<http://dbpedia.org/resource/Rambo_III> <http://dbpedia.org/ontology/director> ?Director" +
+                "<"+uri+"> <http://dbpedia.org/ontology/director> ?Director" +
                 "} LIMIT 100", function(res) {
+
+      sparqlQuery("select distinct ?Actors where {" +
+                "<"+uri+"> <http://dbpedia.org/ontology/starring> ?Actors" +
+                "} LIMIT 100", function(res) {
+
+        sparqlQuery("select distinct ?OtherFilms where {" +
+                    "?OtherFilms <http://dbpedia.org/ontology/director> <"+directorURI+">" +
+                    "} LIMIT 100", function(res) {
+
+        }.bind(this));
+
+      }.bind(this));
 
     }.bind(this));
   },
   queryBook: function(uri) {
+    sparqlQuery("select distinct ?Author where {" +
+                "<"+uri+"> <http://dbpedia.org/ontology/author> ?Author" +
+                "} LIMIT 100", function(res) {
 
+      sparqlQuery("select distinct ?OtherBooks where {" +
+                "?OtherBooks <http://dbpedia.org/ontology/author> <"+ authorURI +">" +
+                "} LIMIT 100", function(res) {
+
+      }.bind(this));
+
+    }.bind(this));
   },
   queryGame: function(uri) {
 
