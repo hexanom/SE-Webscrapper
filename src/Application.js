@@ -37,7 +37,7 @@ var Application = React.createClass({
           var types = elmt["@types"];
           if(/music/.test(types)) {
             this.queryMusic(uri);
-          } else if(/movie/.test(types)) {
+          } else if(/movie/.test(types) || /tv/.test(types) || /film/.test(types)) {
             this.queryMovie(uri);
           } else if(/book/.test(types)) {
             this.queryBook(uri);
@@ -77,5 +77,5 @@ var Application = React.createClass({
 
 React.render(
   <Application/>,
-  document.getElementById('content')
+  document.getElementById('app')
 );

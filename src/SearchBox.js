@@ -6,10 +6,16 @@ var SearchBox = React.createClass({
   },
   render: function() {
     return (
-      <form className="searchForm" onSubmit={this.handleSubmit} action="#">
-        <input type="search" clasName="form-control " placeholder="Artist, album, …" ref="query"/>
-        <input type="submit" value="Search &rarr;" />
-      </form>
+      <div className="navbar navbar-default">
+        <div className="container">
+          <span className="navbar-brand col-md-2">
+            Culture View
+          </span>
+          <form className="navbar-left col-md-8" onSubmit={this.handleSubmit} action="#">
+            <input type="text" size="100%" className="form-control" placeholder="Type an Artist, a Movie, ... and hit ENTER !" ref="query"/>
+          </form>
+        </div>
+      </div>
     );
   }
 });
