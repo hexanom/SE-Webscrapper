@@ -84,6 +84,15 @@ var Application = React.createClass({
 
   },
   queryGame: function(uri) {
+    sparqlQuery("select distinct ?Developers where {" +
+                "<http://dbpedia.org/resource/BioShock> <http://dbpedia.org/ontology/developer> ?Developers." +
+                "} LIMIT 100", function(res) {
+
+              sparqlQuery("select distinct ?OtherGames where {" +
+                  "?OtherGames <http://dbpedia.org/ontology/developer> <"+developerURI+">." +
+                  "} LIMIT 100", function(res) {     
+
+    }.bind(this));
 
   },
   render: function() {
