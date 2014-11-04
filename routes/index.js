@@ -1,4 +1,4 @@
-"use script";
+"use strict";
 
 var express = require('express');
 var router = express.Router();
@@ -19,15 +19,31 @@ router.get('/', function(req, res, next) {
       cb(null, req.query.q);
     },
     ddgScrapper,
-    textExtracter,
-    function rdfEach(texts, next) {
-      async.map(texts, function mapTexts(text, cb) {
+    function extractTextEach(htmls, cb) {
+      var texts = {};
+      async.each(Object.keys(htmls), function mapHtmls(uri, cbE) {
+        var text = textExtracter(htmls[uri]);
         if(text) {
-          rdfExtracter(text, cb);
-        } else {
-          cb(null, null);
+          texts[uri] = text;
         }
-      }, next);
+        cbE();
+      }, function(err) {
+        cb(err, texts);
+      });
+    },
+    function rdfEach(texts, cb) {
+      var graphs = {};
+      async.each(Object.keys(texts), function mapTexts(uri, cbE) {
+        rdfExtracter(uri, texts[uri], function(err, graph) {
+          if(err && !graph) {
+            return cbE(err);
+          }
+          graphs[uri] = graph;
+          cbE();
+        });
+      }, function(err) {
+        cb(err, graphs);
+      });
     },
     // ???,
     function renderResults(results, cb) {
