@@ -14,6 +14,9 @@ bower_components
 # if you remove the above rule, at least ignore the following:
 
 # User-specific stuff:
+
+GET /?q=barack+obama 200 30513.709 ms - 3924
+GET /stylesheets/style.css 200 28.209 ms - 87
 # .idea/workspace.xml
 # .idea/tasks.xml
 # .idea/dictionaries
