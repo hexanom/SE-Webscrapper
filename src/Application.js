@@ -8,11 +8,10 @@ function sparqlQuery(sparql, cb) {
     .get("http://dbpedia.org/sparql")
     .query({
       "default-graph-uri": "http://dbpedia.org",
-      query: String.replace(sparql, /%1/, this.state.uri),
+      query: sparql,
       format: "json",
       timeout: 30000
     })
-    .send(this.props.subject)
     .set('Accept', 'application/json')
     .end(function(res) {
       if(res.ok && res.body) {
@@ -48,6 +47,7 @@ var Application = React.createClass({
       }.bind(this));
   },
   queryMusic: function(uri) {
+    console.log("music");
     sparqlQuery("select distinct ?Artist where {" +
                 "<"+uri+"> <http://dbpedia.org/property/artist> ?Artist." +
                 "?Album <http://dbpedia.org/property/artist> ?Artist." +
@@ -74,6 +74,7 @@ var Application = React.createClass({
     }.bind(this));
   },
   queryMovie: function(uri) {
+    console.log("movie");
     sparqlQuery("select distinct ?Director where {" +
                 "<"+uri+"> <http://dbpedia.org/ontology/director> ?Director" +
                 "} LIMIT 100", function(res) {
@@ -93,6 +94,7 @@ var Application = React.createClass({
     }.bind(this));
   },
   queryBook: function(uri) {
+    console.log("book");
     sparqlQuery("select distinct ?Author where {" +
                 "<"+uri+"> <http://dbpedia.org/ontology/author> ?Author" +
                 "} LIMIT 100", function(res) {
@@ -106,7 +108,7 @@ var Application = React.createClass({
     }.bind(this));
   },
   queryGame: function(uri) {
-
+    console.log("game");
   },
   render: function() {
     return (
