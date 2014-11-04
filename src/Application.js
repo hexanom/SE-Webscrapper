@@ -48,19 +48,62 @@ var Application = React.createClass({
       }.bind(this));
   },
   queryMusic: function(uri) {
-    sparqlQuery("BWAAAA", function(res) {
-      sparqlQuery("BWAAAA", function(res) {
-        sparqlQuery("BWAAAA", function(res) {
+    sparqlQuery("select distinct ?Artist where {" +
+                "<"+uri+"> <http://dbpedia.org/property/artist> ?Artist." +
+                "?Album <http://dbpedia.org/property/artist> ?Artist." +
+                "} LIMIT 100", function(res) {
+
+
+      sparqlQuery("select distinct ?OtherAlbums where {" +
+                  "?OtherAlbums <http://dbpedia.org/property/artist> <"+artistURI+">." +
+                  "?OtherAlbums a <http://dbpedia.org/ontology/Album>." +
+                  "} LIMIT 100", function(res) {
+
+
+
+
+        sparqlQuery("select distinct ?AssociatedArtist where {" +
+                    "<"+artistURI+"> <http://dbpedia.org/ontology/associatedBand> ?AssociatedArtist" +
+                    "} LIMIT 100", function(res) {
+
+
+
           this.setState({graph: res});
         }.bind(this));
       }.bind(this));
     }.bind(this));
   },
   queryMovie: function(uri) {
+    sparqlQuery("select distinct ?Director where {" +
+                "<"+uri+"> <http://dbpedia.org/ontology/director> ?Director" +
+                "} LIMIT 100", function(res) {
 
+      sparqlQuery("select distinct ?Actors where {" +
+                "<"+uri+"> <http://dbpedia.org/ontology/starring> ?Actors" +
+                "} LIMIT 100", function(res) {
+
+        sparqlQuery("select distinct ?OtherFilms where {" +
+                    "?OtherFilms <http://dbpedia.org/ontology/director> <"+directorURI+">" +
+                    "} LIMIT 100", function(res) {
+
+        }.bind(this));
+
+      }.bind(this));
+
+    }.bind(this));
   },
   queryBook: function(uri) {
+    sparqlQuery("select distinct ?Author where {" +
+                "<"+uri+"> <http://dbpedia.org/ontology/author> ?Author" +
+                "} LIMIT 100", function(res) {
 
+      sparqlQuery("select distinct ?OtherBooks where {" +
+                "?OtherBooks <http://dbpedia.org/ontology/author> <"+ authorURI +">" +
+                "} LIMIT 100", function(res) {
+
+      }.bind(this));
+
+    }.bind(this));
   },
   queryGame: function(uri) {
 
