@@ -12,10 +12,9 @@ function sparqlQuery(sparql, cb) {
       format: "json",
       timeout: 30000
     })
-    .set('Accept', 'application/json')
     .end(function(res) {
-      if(res.ok && res.body) {
-        cb(res.body);
+      if(res.ok && res.text) {
+        cb(JSON.parse(res.text));
       }
     });
 }
@@ -47,22 +46,22 @@ var Application = React.createClass({
       }.bind(this));
   },
   queryMusic: function(uri) {
-    sparqlQuery("select distinct ?Artist where {" +
-                "<"+uri+"> <http://dbpedia.org/property/artist> ?Artist." +
-                "?Album <http://dbpedia.org/property/artist> ?Artist." +
+    sparqlQuery("select distinct ?Artist where { " +
+                "<"+uri+"> <http://dbpedia.org/property/artist> ?Artist. " +
+                "?Album <http://dbpedia.org/property/artist> ?Artist. " +
                 "} LIMIT 100", function(res) {
 
 
-      sparqlQuery("select distinct ?OtherAlbums where {" +
-                  "?OtherAlbums <http://dbpedia.org/property/artist> <"+artistURI+">." +
-                  "?OtherAlbums a <http://dbpedia.org/ontology/Album>." +
+      sparqlQuery("select distinct ?OtherAlbums where { " +
+                  "?OtherAlbums <http://dbpedia.org/property/artist> <"+artistURI+">. " +
+                  "?OtherAlbums a <http://dbpedia.org/ontology/Album>. " +
                   "} LIMIT 100", function(res) {
 
 
 
 
-        sparqlQuery("select distinct ?AssociatedArtist where {" +
-                    "<"+artistURI+"> <http://dbpedia.org/ontology/associatedBand> ?AssociatedArtist" +
+        sparqlQuery("select distinct ?AssociatedArtist where { " +
+                    "<"+artistURI+"> <http://dbpedia.org/ontology/associatedBand> ?AssociatedArtist. " +
                     "} LIMIT 100", function(res) {
 
 
@@ -73,16 +72,17 @@ var Application = React.createClass({
     }.bind(this));
   },
   queryMovie: function(uri) {
-    sparqlQuery("select distinct ?Director where {" +
-                "<"+uri+"> <http://dbpedia.org/ontology/director> ?Director" +
+    sparqlQuery("select distinct ?Director where { " +
+                "<"+uri+"> <http://dbpedia.org/ontology/director> ?Director. " +
                 "} LIMIT 100", function(res) {
 
-      sparqlQuery("select distinct ?Actors where {" +
-                "<"+uri+"> <http://dbpedia.org/ontology/starring> ?Actors" +
+
+      sparqlQuery("select distinct ?Actors where { " +
+                "<"+uri+"> <http://dbpedia.org/ontology/starring> ?Actors. " +
                 "} LIMIT 100", function(res) {
 
-        sparqlQuery("select distinct ?OtherFilms where {" +
-                    "?OtherFilms <http://dbpedia.org/ontology/director> <"+directorURI+">" +
+        sparqlQuery("select distinct ?OtherFilms where { " +
+                    "?OtherFilms <http://dbpedia.org/ontology/director> <"+directorURI+">. " +
                     "} LIMIT 100", function(res) {
 
         }.bind(this));
@@ -92,12 +92,12 @@ var Application = React.createClass({
     }.bind(this));
   },
   queryBook: function(uri) {
-    sparqlQuery("select distinct ?Author where {" +
-                "<"+uri+"> <http://dbpedia.org/ontology/author> ?Author" +
+    sparqlQuery("select distinct ?Author where { " +
+                "<"+uri+"> <http://dbpedia.org/ontology/author> ?Author. " +
                 "} LIMIT 100", function(res) {
 
-      sparqlQuery("select distinct ?OtherBooks where {" +
-                "?OtherBooks <http://dbpedia.org/ontology/author> <"+ authorURI +">" +
+      sparqlQuery("select distinct ?OtherBooks where { " +
+                "?OtherBooks <http://dbpedia.org/ontology/author> <"+ authorURI +">. " +
                 "} LIMIT 100", function(res) {
 
       }.bind(this));
@@ -105,7 +105,16 @@ var Application = React.createClass({
     }.bind(this));
   },
   queryGame: function(uri) {
+    sparqlQuery("select distinct ?Developers where { " +
+                "<http://dbpedia.org/resource/BioShock> <http://dbpedia.org/ontology/developer> ?Developers. " +
+                "} LIMIT 100", function(res) {
 
+      sparqlQuery("select distinct ?OtherGames where { " +
+                  "?OtherGames <http://dbpedia.org/ontology/developer> <"+developerURI+">. " +
+                  "} LIMIT 100", function(res) {
+
+      }.bind(this));
+    }.bind(this));
   },
   render: function() {
     return (
