@@ -14,6 +14,7 @@ var Graph = React.createClass({
       .size([this.props.width, this.props.height])
       .gravity(0.1)
       .charge(-1000)
+      .linkDistance(100)
       .on("tick", this.handleTick);
     props.nodes.forEach(function(node) {
       this.force.nodes().push(node);
@@ -26,7 +27,11 @@ var Graph = React.createClass({
   handleTick: function() {
     this.setState({nodes: this.force.nodes(), paths: this.force.links()});
   },
+  handleNodeClick: function(node) {
+    console.log(node);
+  },
   render: function() {
+    var self = this;
     var paths = this.state.paths.map(function(path) {
       var dx = path.target.x - path.source.x,
           dy = path.target.y - path.source.y,
@@ -45,9 +50,9 @@ var Graph = React.createClass({
       var transform = "translate(" + node.x + "," + node.y + ")";
       var textStyle = {fill: "white"};
       return (
-        <g transform={transform} className="node">
-          <circle r="5px" fill="white"></circle>
-          <text x="12" dy=".35em" style={textStyle}>{node.name}</text>
+        <g transform={transform} className="node" data-name={node.name}>
+          <circle r="10px" fill="white" onClick={self.handleNodeClick} data-name={node.name}></circle>
+          <text x="15" dy=".35em" style={textStyle}>{node.name}</text>
         </g>
       );
     });
