@@ -16,6 +16,9 @@ function sparqlQuery(sparql, cb) {
       if(res.ok && res.text) {
         cb(JSON.parse(res.text));
       }
+      else {
+        console.error("Error on request !");
+      }
     });
 }
 
@@ -31,7 +34,7 @@ var Application = React.createClass({
       .end(function(res) {
         if(res.ok && res.body.Resources[0]) {
           var elmt = res.body.Resources[0];
-          var uri = elmt["@URI"];
+          var uri = decodeURIComponent(elmt["@URI"]);
           var types = elmt["@types"];
           if(/music/.test(types)) {
             this.queryMusic(uri);
@@ -51,24 +54,41 @@ var Application = React.createClass({
                 "?Album <http://dbpedia.org/property/artist> ?Artist. " +
                 "} LIMIT 100", function(res) {
 
+      var artists = res.results.bindings.filter(function(elem) {
+        return elem.Artist.type === "uri";
+      }).map(function(elem) {
+        return elem.Artist.value;
+      });
+      var artistURI = artists[0];
 
-      sparqlQuery("select distinct ?OtherAlbums where { " +
-                  "?OtherAlbums <http://dbpedia.org/property/artist> <"+artistURI+">. " +
-                  "?OtherAlbums a <http://dbpedia.org/ontology/Album>. " +
-                  "} LIMIT 100", function(res) {
+      for(var i = 0; i < artists.length; i++) {
 
+        var artistURI = artists[i];
 
-
-
-        sparqlQuery("select distinct ?AssociatedArtist where { " +
-                    "<"+artistURI+"> <http://dbpedia.org/ontology/associatedBand> ?AssociatedArtist. " +
+        sparqlQuery("select distinct ?OtherAlbums where { " +
+                    "?OtherAlbums <http://dbpedia.org/property/artist> <"+artistURI+">. " +
+                    "?OtherAlbums a <http://dbpedia.org/ontology/Album>. " +
                     "} LIMIT 100", function(res) {
 
+          var otherAlbums = res.results.bindings.filter(function(elem) {
+            return elem.OtherAlbums.type === "uri";
+          }).map(function(elem) {
+            return elem.OtherAlbums.value;
+          });
 
+          sparqlQuery("select distinct ?AssociatedArtist where { " +
+                      "<"+artistURI+"> <http://dbpedia.org/ontology/associatedBand> ?AssociatedArtist. " +
+                      "} LIMIT 100", function(res) {
 
-          this.setState({graph: res});
+            var associatedArtists = res.results.bindings.filter(function(elem) {
+              return elem.AssociatedArtist.type === "uri";
+            }).map(function(elem) {
+              return elem.AssociatedArtist.value;
+            });
+
+          }.bind(this));
         }.bind(this));
-      }.bind(this));
+      }
     }.bind(this));
   },
   queryMovie: function(uri) {
@@ -76,16 +96,35 @@ var Application = React.createClass({
                 "<"+uri+"> <http://dbpedia.org/ontology/director> ?Director. " +
                 "} LIMIT 100", function(res) {
 
+      var directors = res.results.bindings.filter(function(elem) {
+        return elem.Director.type === "uri";
+      }).map(function(elem) {
+        return elem.Director.value;
+      });
 
       sparqlQuery("select distinct ?Actors where { " +
                 "<"+uri+"> <http://dbpedia.org/ontology/starring> ?Actors. " +
                 "} LIMIT 100", function(res) {
 
-        sparqlQuery("select distinct ?OtherFilms where { " +
+        var actors = res.results.bindings.map(function(elem) {
+          return elem.Actors.value;
+        });
+
+        for(var i = 0; i < directors.length; i++) {
+
+          var directorURI = directors[i];
+
+          sparqlQuery("select distinct ?OtherFilms where { " +
                     "?OtherFilms <http://dbpedia.org/ontology/director> <"+directorURI+">. " +
                     "} LIMIT 100", function(res) {
 
-        }.bind(this));
+            var otherFilms = res.results.bindings.map(function(elem) {
+              return elem.OtherFilms.value;
+            });
+
+          }.bind(this));
+
+        }
 
       }.bind(this));
 
