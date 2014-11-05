@@ -184,11 +184,26 @@ var Application = React.createClass({
                 "<"+uri+"> <http://dbpedia.org/ontology/author> ?Author. " +
                 "} LIMIT 100", function(res) {
 
+          var authors= res.results.bindings.filter(function(elem) {
+            return elem.Author.type === "uri";
+          }).map(function(elem) {
+               return elem.Author.value;
+          });
+
+          for(var i = 0; i < authors.length; i++) {
+
+           var authorURI = authors[i];
+
       sparqlQuery("select distinct ?OtherBooks where { " +
                 "?OtherBooks <http://dbpedia.org/ontology/author> <"+ authorURI +">. " +
                 "} LIMIT 100", function(res) {
 
+                     var otherBooks = res.results.bindings.map(function(elem) {
+                        return elem.OtherBooks.value;
+                    });
+
       }.bind(this));
+    }
 
     }.bind(this));
   },
@@ -196,12 +211,26 @@ var Application = React.createClass({
     sparqlQuery("select distinct ?Developers where { " +
                 "<http://dbpedia.org/resource/BioShock> <http://dbpedia.org/ontology/developer> ?Developers. " +
                 "} LIMIT 100", function(res) {
+                       var developers = res.results.bindings.filter(function(elem) {
+                        return elem.Developers.type === "uri";
+                      }).map(function(elem) {
+                        return elem.Developers.value;
+                      });
 
-      sparqlQuery("select distinct ?OtherGames where { " +
-                  "?OtherGames <http://dbpedia.org/ontology/developer> <"+developerURI+">. " +
-                  "} LIMIT 100", function(res) {
+                      for(var i = 0; i < developers.length; i++) {
 
-      }.bind(this));
+                        var developerURI = developers[i];
+
+                        sparqlQuery("select distinct ?OtherGames where { " +
+                                    "?OtherGames <http://dbpedia.org/ontology/developer> <"+developerURI+">. " +
+                                    "} LIMIT 100", function(res) {
+
+                                      var otherGames = res.results.bindings.map(function(elem) {
+                                        return elem.OtherGames.value;
+                                      });
+
+                        }.bind(this));
+                      }
     }.bind(this));
   },
   render: function() {
