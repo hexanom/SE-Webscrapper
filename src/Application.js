@@ -22,9 +22,12 @@ function sparqlQuery(sparql, cb) {
 
 var Application = React.createClass({
   getInitialState: function() {
-    return {graph: []};
+    return {graph: {paths: [], nodes: []}};
   },
   querySpotlight: function(query) {
+    var please = {name: "please"};
+    var wait = {name: "wait"};
+    this.setState({graph: {nodes: [please, wait], paths: [{source: please, target: wait}]}});
     request
       .get("http://spotlight.dbpedia.org/rest/annotate")
       .query({ text: query })
@@ -111,7 +114,7 @@ var Application = React.createClass({
     return (
       <div className="Application">
         <SearchBox onSearchSubmit={this.querySpotlight}/>
-        <Graph data={this.state.graph}/>
+        <Graph paths={this.state.graph.paths} nodes={this.state.graph.nodes} width="500" height="400"/>
       </div>
     );
   }
