@@ -1,25 +1,22 @@
 {
   "name": "SE-Webscrapper",
   "version": "0.0.0",
-  "private": true,
-  "scripts": {
-    "start": "node ./bin/www"
-  },
+  "description": "",
+  "main": "gulpfile.js",
   "dependencies": {
-    "async": "^0.9.0",
-    "body-parser": "~1.8.1",
-    "cheerio": "^0.17.0",
-    "cookie-parser": "~1.3.3",
-    "dbpedia-spotlight": "~0.5.27",
-    "debug": "~2.0.0",
-    "express": "~4.9.0",
-    "hbs": "~2.7.0",
-    "less-middleware": "1.0.x",
-    "morgan": "~1.3.0",
-    "rarity": "^2.1.1",
-    "serve-favicon": "~2.1.3",
-    "sparql-client": "^0.1.0",
-    "supertest": "^0.14.0",
-    "unfluff": "^0.10.0"
+    "gulp-connect": "~2.2.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/hexanom/SE-Webscrapper.git"
+  },
+  "author": "",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/hexanom/SE-Webscrapper/issues"
   }
 }

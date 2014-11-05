@@ -1,0 +1,29 @@
+{
+  "name": "culture-view",
+  "version": "0.0.1",
+  "homepage": "https://github.com/hexanom/SE-Webscrapper",
+  "authors": [
+    "Robin Ricard <ricard.robin@gmail.com>"
+  ],
+  "description": "Find related work of art",
+  "main": "index.html",
+  "moduleType": [
+    "globals"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "react": "~0.12.0",
+    "bootstrap": "~3.3.0",
+    "d3": "~3.4.13",
+    "superagent": "~0.20.0",
+    "async": "~0.9.0"
+  }
+}
