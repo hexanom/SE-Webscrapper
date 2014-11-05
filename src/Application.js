@@ -267,7 +267,7 @@ var Application = React.createClass({
               });
 
               actors.forEach(function(actorURI) {
-                var actorNode = {name: nameFromURI(actorURI), color:"green", uri:actorURI, type:"movie"};
+                var actorNode = {name: nameFromURI(actorURI), color:"green", uri:actorURI, type:"actor"};
                 nodes.push(actorNode);
                 paths.push({source: rootNode, target: actorNode});
               });
