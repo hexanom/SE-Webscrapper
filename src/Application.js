@@ -23,7 +23,7 @@ function sparqlQuery(sparql, cb) {
 }
 
 function nameFromURI(uri) {
-  return uri.substring(uri.lastIndexOf("/") + 1).replace(/_/g, " ");
+  return decodeURIComponent(uri.substring(uri.lastIndexOf("/") + 1).replace(/_/g, " "));
 }
 
 var Application = React.createClass({
@@ -35,8 +35,14 @@ var Application = React.createClass({
     var wait = {name: "wait"};
     this.setState({graph: {nodes: [please, wait], paths: [{source: please, target: wait}]}, query: query});
     if(type && uri) {
-      if(type === "musician") {
+      if(type === "author") {
+        return this.queryBook(uri, true);
+      } else if(type === "developer") {
+        return this.queryGame(uri, true);
+      } else if(type === "musician") {
         return this.queryMusic(uri, true);
+      } else if(type === "director") {
+        return this.queryMovie(uri, true);
       } else if(type === "music") {
         return this.queryMusic(uri);
       } else if(type === "movie") {
@@ -56,11 +62,17 @@ var Application = React.createClass({
           var elmt = res.body.Resources[0];
           var uri = decodeURIComponent(elmt["@URI"]);
           var types = elmt["@types"];
-          if(/music\/artist/.test(types)) {
+          if(/book\/author/.test(types)) {
+            this.queryBook(uri, true);
+          } else if(/developer/.test(types)) {
+            this.queryGame(uri, true);
+          } else if(/director/.test(types)) {
+            this.queryMovie(uri, true);
+          } else if(/music\/artist/.test(types)) {
             this.queryMusic(uri, true);
           } else if(/music/.test(types)) {
             this.queryMusic(uri);
-          } else if(/movie/.test(types) || /tv/.test(types) || /film/.test(types)) {
+          } else if(/movie/.test(types) || /tv/.test  (types) || /film/.test(types)) {
             this.queryMovie(uri);
           } else if(/book/.test(types)) {
             this.queryBook(uri);
@@ -168,7 +180,7 @@ var Application = React.createClass({
         this.setState({graph: {nodes: nodes, paths: paths}, query: this.state.query});
     }.bind(this));
   },
-  queryMovie: function(uri) {
+  queryMovie: function(uri, isDirector) {
 
     var nodes = [];
     var paths = [];
@@ -178,6 +190,9 @@ var Application = React.createClass({
 
     async.waterfall([
       function getDirectors(cb) {
+
+        if(isDirector) { cb(null, uri); return }
+
         sparqlQuery("select distinct ?Director where { " +
                 "<"+uri+"> <http://dbpedia.org/ontology/director> ?Director. " +
                 "} LIMIT 100", function(res) {
@@ -185,6 +200,9 @@ var Application = React.createClass({
         });
       },
       function extractDirectors(res, cb) {
+
+        if(isDirector) { cb(null, [uri]); return }
+
         var directors = res.results.bindings.filter(function(elem) {
           return elem.Director.type === "uri";
         }).map(function(elem) {
@@ -217,9 +235,14 @@ var Application = React.createClass({
           function getOtherFilms() {
             async.each(directors, function(directorURI, cb) {
 
-              var directorNode = {name: nameFromURI(directorURI),  color:"red", uri:directorURI, type:"movie"};
-              nodes.push(directorNode);
-              paths.push({source: rootNode, target: directorNode});
+              if(!isDirector) {
+                var directorNode = {name: nameFromURI(directorURI),  color:"red", uri:directorURI, type:"director"};
+                nodes.push(directorNode);
+                paths.push({source: rootNode, target: directorNode});
+              }
+              else {
+                var directorNode = rootNode;
+              }
 
               sparqlQuery("select distinct ?OtherFilms where { " +
                         "?OtherFilms <http://dbpedia.org/ontology/director> <"+directorURI+">. " +
@@ -252,7 +275,7 @@ var Application = React.createClass({
         this.setState({graph: {nodes: nodes, paths: paths}, query: this.state.query});
     }.bind(this));
   },
-  queryBook: function(uri) {
+  queryBook: function(uri, isAuthor) {
 
     var nodes = [];
     var paths = [];
@@ -262,6 +285,7 @@ var Application = React.createClass({
 
     async.waterfall([
       function getAuthors(cb) {
+        if(isAuthor) { cb(null, uri); return; }
         sparqlQuery("select distinct ?Author where { " +
                 "<"+uri+"> <http://dbpedia.org/ontology/author> ?Author. " +
                 "} LIMIT 100", function(res) {
@@ -269,6 +293,7 @@ var Application = React.createClass({
         });
       },
       function extractAuthors(res, cb) {
+        if(isAuthor) { cb(null, [res]); return; }
         var authors = res.results.bindings.filter(function(elem) {
           return elem.Author.type === "uri";
         }).map(function(elem) {
@@ -279,9 +304,14 @@ var Application = React.createClass({
       function getOtherBooks(authors, cb) {
         async.each(authors, function(authorURI, cb) {
 
-          var authorNode = {name: nameFromURI(authorURI), color:"red", uri:authorURI, type:"book"};
-          nodes.push(authorNode);
-          paths.push({source: rootNode, target: authorNode});
+          if(!isAuthor) {
+            var authorNode = {name: nameFromURI(authorURI), color:"red", uri:authorURI, type:"author"};
+            nodes.push(authorNode);
+            paths.push({source: rootNode, target: authorNode});
+          }
+          else {
+            var authorNode = rootNode;
+          }
 
           sparqlQuery("select distinct ?OtherBooks where { " +
                 "?OtherBooks <http://dbpedia.org/ontology/author> <"+ authorURI +">. " +
@@ -314,7 +344,7 @@ var Application = React.createClass({
     }.bind(this));
 
   },
-  queryGame: function(uri) {
+  queryGame: function(uri, isDeveloper) {
 
     var nodes = [];
     var paths = [];
@@ -324,6 +354,7 @@ var Application = React.createClass({
 
     async.waterfall([
       function getDevelopers(cb) {
+        if(isDeveloper) { cb(null, uri); return }
         sparqlQuery("select distinct ?Developer where { " +
                 "<"+uri+"> <http://dbpedia.org/ontology/developer> ?Developer. " +
                 "} LIMIT 100", function(res) {
@@ -331,6 +362,7 @@ var Application = React.createClass({
         });
       },
       function extractDevelopers(res, cb) {
+        if(isDeveloper) { cb(null, [res]); return }
         var devs = res.results.bindings.filter(function(elem) {
           return elem.Developer.type === "uri";
         }).map(function(elem) {
@@ -341,13 +373,18 @@ var Application = React.createClass({
       function getOtherGames(developers, cb) {
         async.each(developers, function(developerURI, cb) {
 
-          var devNode = {name: nameFromURI(developerURI), color:"green", uri:developerURI, type:"game"};
-          nodes.push(devNode);
-          paths.push({source: rootNode, target: devNode});
+          if(!isDeveloper) {
+            var devNode = {name: nameFromURI(developerURI), color:"green", uri:developerURI, type:"developer"};
+            nodes.push(devNode);
+            paths.push({source: rootNode, target: devNode});
+          }
+          else {
+            var devNode = rootNode;
+          }
 
           sparqlQuery("select distinct ?OtherGame where { " +
                       "?OtherGame <http://dbpedia.org/ontology/developer> <"+developerURI+">. " +
-                      "} LIMIT 100", function(res) {
+                      "} LIMIT 1000", function(res) {
 
             var otherGames = res.results.bindings.filter(function(elem) {
               return elem.OtherGame.type === "uri";
