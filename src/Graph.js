@@ -28,7 +28,8 @@ var Graph = React.createClass({
     this.setState({nodes: this.force.nodes(), paths: this.force.links()});
   },
   handleNodeClick: function(node) {
-    this.props.onNodeClick(node.target.attributes['data-name'].value);
+    var attrs = node.target.attributes;
+    this.props.onNodeClick(attrs['data-name'].value, attrs['data-type'].value, attrs['data-uri'].value);
   },
   render: function() {
     var self = this;
@@ -50,8 +51,8 @@ var Graph = React.createClass({
       var transform = "translate(" + node.x + "," + node.y + ")";
       var textStyle = {fill: "white"};
       return (
-        <g transform={transform} className="node" data-name={node.name}>
-          <circle r="10px" fill={node.color} onClick={self.handleNodeClick} data-name={node.name}></circle>
+        <g transform={transform} className="node">
+          <circle r="10px" fill={node.color} onClick={self.handleNodeClick} data-name={node.name} data-type={node.type} data-uri={node.uri}></circle>
           <text x="15" dy=".35em" style={textStyle}>{node.name}</text>
         </g>
       );

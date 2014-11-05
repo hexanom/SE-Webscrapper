@@ -30,10 +30,21 @@ var Application = React.createClass({
   getInitialState: function() {
     return {graph: {paths: [], nodes: []}, query: ""};
   },
-  querySpotlight: function(query) {
+  querySpotlight: function(query, type, uri) {
     var please = {name: "please"};
     var wait = {name: "wait"};
     this.setState({graph: {nodes: [please, wait], paths: [{source: please, target: wait}]}, query: query});
+    if(type && uri) {
+      if(type === "music") {
+        return this.queryMusic(uri);
+      } else if(type === "movie") {
+        return this.queryMovie(uri);
+      } else if(type === "book") {
+        return this.queryBook(uri);
+      } else if(type === "game") {
+        return this.queryGame(uri);
+      }
+    }
     request
       .get("http://spotlight.dbpedia.org/rest/annotate")
       .query({ text: query })
