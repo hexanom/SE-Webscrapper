@@ -1,8 +1,15 @@
-## Launch Fuseki
+# How to launch 
 
-./fuseki-server --update --mem /sem
+Requirements : nodejs + npm
 
-## Add N3 records
+npm -g install bower
+npm -g install gulp
+npm install
+bower install
 
-PUT http://localhost:3030/sem/data?default
-with Content-Type: text/turtle
+When everything is installed:
+
+gulp
+
+App is at http://localhost:8080.
+Search for game names, album names, book names, movie names.
