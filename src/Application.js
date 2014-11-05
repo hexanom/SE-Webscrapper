@@ -35,7 +35,9 @@ var Application = React.createClass({
     var wait = {name: "wait"};
     this.setState({graph: {nodes: [please, wait], paths: [{source: please, target: wait}]}, query: query});
     if(type && uri) {
-      if(type === "author") {
+      if(type === "actor") {
+        return this.queryActor(uri);
+      } else if(type === "author") {
         return this.queryBook(uri, true);
       } else if(type === "developer") {
         return this.queryGame(uri, true);
@@ -70,6 +72,8 @@ var Application = React.createClass({
             this.queryMovie(uri, true);
           } else if(/music\/artist/.test(types)) {
             this.queryMusic(uri, true);
+          } else if (/actor/.test(types)) {
+            this.queryActor(uri);
           } else if(/music/.test(types)) {
             this.queryMusic(uri);
           } else if(/movie/.test(types) || /tv/.test  (types) || /film/.test(types)) {
@@ -180,6 +184,45 @@ var Application = React.createClass({
         this.setState({graph: {nodes: nodes, paths: paths}, query: this.state.query});
     }.bind(this));
   },
+  queryActor: function(uri, isDirector) {
+
+    var nodes = [];
+    var paths = [];
+
+    var rootNode = {name: nameFromURI(uri), uri:uri, type:"actor"};
+    nodes.push(rootNode);
+
+    async.waterfall([
+      function getFilms(cb) {
+        sparqlQuery("select distinct ?Film where { " +
+                    "?Film <http://dbpedia.org/ontology/starring> <"+uri+">. " +
+                     "} LIMIT 100", function(res) {
+          cb(null, res)
+        });
+      },
+      function extractFilms(res, cb) {
+
+        var films = res.results.bindings.filter(function(elem) {
+          return elem.Film.type === "uri";
+        }).map(function(elem) {
+          return elem.Film.value;
+        });
+
+        films.forEach(function(filmURI) {
+          var filmNode = {name: nameFromURI(filmURI), color:"red", uri:filmURI, type:"movie"};
+          nodes.push(filmNode);
+          paths.push({source: rootNode, target: filmNode});
+        });
+
+        cb(null, films);
+      }
+    ], function (err) {
+      if(err)
+        console.error(err);
+      else 
+        this.setState({graph: {nodes: nodes, paths: paths}, query: this.state.query});
+    }.bind(this));
+  },
   queryMovie: function(uri, isDirector) {
 
     var nodes = [];
@@ -224,7 +267,7 @@ var Application = React.createClass({
               });
 
               actors.forEach(function(actorURI) {
-                var actorNode = {name: nameFromURI(actorURI), color:"green", uri:actorURI, type:"movie"};
+                var actorNode = {name: nameFromURI(actorURI), color:"green", uri:actorURI, type:"actor"};
                 nodes.push(actorNode);
                 paths.push({source: rootNode, target: actorNode});
               });
@@ -416,7 +459,7 @@ var Application = React.createClass({
     return (
       <div className="Application">
         <SearchBox onSearchSubmit={this.querySpotlight} query={this.state.query}/>
-        <Graph paths={this.state.graph.paths} nodes={this.state.graph.nodes} onNodeClick={this.querySpotlight} width="800" height="600"/>
+        <Graph paths={this.state.graph.paths} nodes={this.state.graph.nodes} onNodeClick={this.querySpotlight} width="1200" height="600"/>
       </div>
     );
   }
