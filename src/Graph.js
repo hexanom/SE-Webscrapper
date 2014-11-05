@@ -28,7 +28,7 @@ var Graph = React.createClass({
     this.setState({nodes: this.force.nodes(), paths: this.force.links()});
   },
   handleNodeClick: function(node) {
-    console.log(node);
+    this.props.onNodeClick(node.target.attributes['data-name'].value);
   },
   render: function() {
     var self = this;
@@ -51,7 +51,7 @@ var Graph = React.createClass({
       var textStyle = {fill: "white"};
       return (
         <g transform={transform} className="node" data-name={node.name}>
-          <circle r="10px" fill="white" onClick={self.handleNodeClick} data-name={node.name}></circle>
+          <circle r="10px" fill={node.color} onClick={self.handleNodeClick} data-name={node.name}></circle>
           <text x="15" dy=".35em" style={textStyle}>{node.name}</text>
         </g>
       );
