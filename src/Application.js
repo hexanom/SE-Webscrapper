@@ -28,12 +28,12 @@ function nameFromURI(uri) {
 
 var Application = React.createClass({
   getInitialState: function() {
-    return {graph: {paths: [], nodes: []}};
+    return {graph: {paths: [], nodes: []}, query: ""};
   },
   querySpotlight: function(query) {
     var please = {name: "please"};
     var wait = {name: "wait"};
-    this.setState({graph: {nodes: [please, wait], paths: [{source: please, target: wait}]}});
+    this.setState({graph: {nodes: [please, wait], paths: [{source: please, target: wait}]}, query: query});
     request
       .get("http://spotlight.dbpedia.org/rest/annotate")
       .query({ text: query })
@@ -139,8 +139,8 @@ var Application = React.createClass({
     ], function (err) {
       if(err)
         console.error(err);
-      else 
-        this.setState({graph: {nodes: nodes, paths: paths}}); 
+      else
+        this.setState({graph: {nodes: nodes, paths: paths}, query: this.state.query});
     }.bind(this));
   },
   queryMovie: function(uri) {
@@ -224,7 +224,7 @@ var Application = React.createClass({
       if(err)
         console.error(err);
       else 
-        this.setState({graph: {nodes: nodes, paths: paths}}); 
+        this.setState({graph: {nodes: nodes, paths: paths}, query: this.state.query});
     }.bind(this));
   },
   queryBook: function(uri) {
@@ -285,7 +285,7 @@ var Application = React.createClass({
       if(err)
         console.error(err);
       else 
-        this.setState({graph: {nodes: nodes, paths: paths}}); 
+        this.setState({graph: {nodes: nodes, paths: paths}, query: this.state.query});
     }.bind(this));
 
   },
@@ -347,14 +347,14 @@ var Application = React.createClass({
       if(err)
         console.error(err);
       else 
-        this.setState({graph: {nodes: nodes, paths: paths}}); 
+        this.setState({graph: {nodes: nodes, paths: paths}, query: this.state.query});
     }.bind(this));
   },
   render: function() {
     return (
       <div className="Application">
-        <SearchBox onSearchSubmit={this.querySpotlight}/>
-        <Graph paths={this.state.graph.paths} nodes={this.state.graph.nodes} width="800" height="600"/>
+        <SearchBox onSearchSubmit={this.querySpotlight} query={this.state.query}/>
+        <Graph paths={this.state.graph.paths} nodes={this.state.graph.nodes} onNodeClick={this.querySpotlight} width="800" height="600"/>
       </div>
     );
   }

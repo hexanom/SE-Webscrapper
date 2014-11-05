@@ -12,7 +12,7 @@ var SearchBox = React.createClass({
             Culture View
           </span>
           <form className="navbar-left col-md-8" onSubmit={this.handleSubmit} action="#">
-            <input type="text" size="100%" className="form-control" placeholder="Type an Artist, a Movie, ... and hit ENTER !" ref="query"/>
+            <input value={this.props.query} type="text" size="100%" className="form-control" placeholder="Type an Artist, a Movie, ... and hit ENTER !" ref="query"/>
           </form>
         </div>
       </div>
