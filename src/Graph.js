@@ -24,7 +24,6 @@ var Graph = React.createClass({
     this.force.start();
   },
   handleTick: function() {
-    console.log({nodes: this.force.nodes(), paths: this.force.links()})
     this.setState({nodes: this.force.nodes(), paths: this.force.links()});
   },
   render: function() {
@@ -39,21 +38,21 @@ var Graph = React.createClass({
         path.target.x + "," +
         path.target.y;
       return (
-        <path d={d} className="link"></path>
+        <path d={d} className="link" fill="none" stroke="grey"></path>
       );
     });
     var nodes = this.state.nodes.map(function(node) {
       var transform = "translate(" + node.x + "," + node.y + ")";
-      console.log(transform)
+      var textStyle = {fill: "white"};
       return (
         <g transform={transform} className="node">
           <circle r="5px" fill="white"></circle>
-          <text x="12" dy=".35em">{node.name}</text>
+          <text x="12" dy=".35em" style={textStyle}>{node.name}</text>
         </g>
       );
     });
     return (
-      <svg width={this.props.width} height={this.props.height}>
+      <svg className="absolute center" width={this.props.width} height={this.props.height}>
         <g>
           {paths}
         </g>
