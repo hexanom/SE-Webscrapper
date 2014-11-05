@@ -35,7 +35,9 @@ var Application = React.createClass({
     var wait = {name: "wait"};
     this.setState({graph: {nodes: [please, wait], paths: [{source: please, target: wait}]}, query: query});
     if(type && uri) {
-      if(type === "musician") {
+      if(type === "developer") {
+        return this.queryGame(uri, true);
+      } else if(type === "musician") {
         return this.queryMusic(uri, true);
       } else if(type === "director") {
         return this.queryMovie(uri, true);
@@ -58,13 +60,15 @@ var Application = React.createClass({
           var elmt = res.body.Resources[0];
           var uri = decodeURIComponent(elmt["@URI"]);
           var types = elmt["@types"];
-          if(/director/.test(types)) {
+          if(/developer/.test(types)) {
+            this.queryGame(uri, true);
+          } else if(/director/.test(types)) {
             this.queryMovie(uri, true);
           } else if(/music\/artist/.test(types)) {
             this.queryMusic(uri, true);
           } else if(/music/.test(types)) {
             this.queryMusic(uri);
-          } else if(/movie/.test(types) || /tv/.test(types) || /film/.test(types)) {
+          } else if(/movie/.test(types) || /tv/.test  (types) || /film/.test(types)) {
             this.queryMovie(uri);
           } else if(/book/.test(types)) {
             this.queryBook(uri);
@@ -329,7 +333,7 @@ var Application = React.createClass({
     }.bind(this));
 
   },
-  queryGame: function(uri) {
+  queryGame: function(uri, isDeveloper) {
 
     var nodes = [];
     var paths = [];
@@ -339,6 +343,7 @@ var Application = React.createClass({
 
     async.waterfall([
       function getDevelopers(cb) {
+        if(isDeveloper) { cb(null, uri); return }
         sparqlQuery("select distinct ?Developer where { " +
                 "<"+uri+"> <http://dbpedia.org/ontology/developer> ?Developer. " +
                 "} LIMIT 100", function(res) {
@@ -346,6 +351,7 @@ var Application = React.createClass({
         });
       },
       function extractDevelopers(res, cb) {
+        if(isDeveloper) { cb(null, [res]); return }
         var devs = res.results.bindings.filter(function(elem) {
           return elem.Developer.type === "uri";
         }).map(function(elem) {
@@ -356,13 +362,18 @@ var Application = React.createClass({
       function getOtherGames(developers, cb) {
         async.each(developers, function(developerURI, cb) {
 
-          var devNode = {name: nameFromURI(developerURI), color:"green", uri:developerURI, type:"game"};
-          nodes.push(devNode);
-          paths.push({source: rootNode, target: devNode});
+          if(!isDeveloper) {
+            var devNode = {name: nameFromURI(developerURI), color:"green", uri:developerURI, type:"developer"};
+            nodes.push(devNode);
+            paths.push({source: rootNode, target: devNode});
+          }
+          else {
+            var devNode = rootNode;
+          }
 
           sparqlQuery("select distinct ?OtherGame where { " +
                       "?OtherGame <http://dbpedia.org/ontology/developer> <"+developerURI+">. " +
-                      "} LIMIT 100", function(res) {
+                      "} LIMIT 1000", function(res) {
 
             var otherGames = res.results.bindings.filter(function(elem) {
               return elem.OtherGame.type === "uri";
