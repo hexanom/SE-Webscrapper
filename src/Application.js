@@ -35,7 +35,9 @@ var Application = React.createClass({
     var wait = {name: "wait"};
     this.setState({graph: {nodes: [please, wait], paths: [{source: please, target: wait}]}, query: query});
     if(type && uri) {
-      if(type === "music") {
+      if(type === "musician") {
+        return this.queryMusic(uri, true);
+      } else if(type === "music") {
         return this.queryMusic(uri);
       } else if(type === "movie") {
         return this.queryMovie(uri);
@@ -54,7 +56,9 @@ var Application = React.createClass({
           var elmt = res.body.Resources[0];
           var uri = decodeURIComponent(elmt["@URI"]);
           var types = elmt["@types"];
-          if(/music/.test(types)) {
+          if(/music\/artist/.test(types)) {
+            this.queryMusic(uri, true);
+          } else if(/music/.test(types)) {
             this.queryMusic(uri);
           } else if(/movie/.test(types) || /tv/.test(types) || /film/.test(types)) {
             this.queryMovie(uri);
@@ -66,7 +70,7 @@ var Application = React.createClass({
         }
       }.bind(this));
   },
-  queryMusic: function(uri) {
+  queryMusic: function(uri, isArtist) {
 
     var nodes = [];
     var paths = [];
@@ -76,6 +80,9 @@ var Application = React.createClass({
 
     async.waterfall([
       function getArtists(cb) {
+
+        if(isArtist) { cb(null, uri); return }
+
         sparqlQuery("select distinct ?Artist where { " +
                     "<"+uri+"> <http://dbpedia.org/property/artist> ?Artist. " +
                     "?Album <http://dbpedia.org/property/artist> ?Artist. " +
@@ -84,6 +91,8 @@ var Application = React.createClass({
         });
       },
       function extractArtists(res, cb) {
+        if(isArtist) { cb(null, [res]); return }
+
         var artists = res.results.bindings.filter(function(elem) {
           return elem.Artist.type === "uri";
         }).map(function(elem) {
@@ -96,9 +105,14 @@ var Application = React.createClass({
 
         async.each(artists, function(artistURI) {
 
-          var artistNode = {name: nameFromURI(artistURI), uri:artistURI, type:"music"};
-          nodes.push(artistNode);
-          paths.push({source: rootNode, target: artistNode});
+          if(!isArtist) {
+            var artistNode = {name: nameFromURI(artistURI), uri:artistURI, type:"music"};
+            nodes.push(artistNode);
+            paths.push({source: rootNode, target: artistNode});
+          }
+          else {
+            var artistNode = rootNode;
+          }
 
           async.parallel([
             function artistsAlbums(cb){
@@ -136,7 +150,7 @@ var Application = React.createClass({
                 });
 
                 associatedArtists.forEach(function(associatedArtistURI) {
-                  var associatedArtist = {name: nameFromURI(associatedArtistURI), color:"green", uri:associatedArtistURI, type:"music"};
+                  var associatedArtist = {name: nameFromURI(associatedArtistURI), color:"green", uri:associatedArtistURI, type:"musician"};
                   nodes.push(associatedArtist);
                   paths.push({source: artistNode, target: associatedArtist});
                 });
