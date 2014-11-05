@@ -53,7 +53,7 @@ var Graph = React.createClass({
       return (
         <g transform={transform} className="node">
           <circle r="10px" fill={node.color} onClick={self.handleNodeClick} data-name={node.name} data-type={node.type} data-uri={node.uri}></circle>
-          <text x="15" dy=".35em" style={textStyle}>{node.name}</text>
+          <text x="7" dy=".35em" style={textStyle}>{node.name}</text>
         </g>
       );
     });

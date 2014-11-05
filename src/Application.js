@@ -459,7 +459,7 @@ var Application = React.createClass({
     return (
       <div className="Application">
         <SearchBox onSearchSubmit={this.querySpotlight} query={this.state.query}/>
-        <Graph paths={this.state.graph.paths} nodes={this.state.graph.nodes} onNodeClick={this.querySpotlight} width="800" height="600"/>
+        <Graph paths={this.state.graph.paths} nodes={this.state.graph.nodes} onNodeClick={this.querySpotlight} width="1200" height="600"/>
       </div>
     );
   }
