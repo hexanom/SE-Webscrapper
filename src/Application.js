@@ -23,7 +23,7 @@ function sparqlQuery(sparql, cb) {
 }
 
 function nameFromURI(uri) {
-  return uri.substring(uri.lastIndexOf("/") + 1).replace(/_/g, " ");
+  return decodeURIComponent(uri.substring(uri.lastIndexOf("/") + 1).replace(/_/g, " "));
 }
 
 var Application = React.createClass({
@@ -35,7 +35,9 @@ var Application = React.createClass({
     var wait = {name: "wait"};
     this.setState({graph: {nodes: [please, wait], paths: [{source: please, target: wait}]}, query: query});
     if(type && uri) {
-      if(type === "developer") {
+      if(type === "author") {
+        return this.queryBook(uri, true);
+      } else if(type === "developer") {
         return this.queryGame(uri, true);
       } else if(type === "musician") {
         return this.queryMusic(uri, true);
@@ -60,7 +62,9 @@ var Application = React.createClass({
           var elmt = res.body.Resources[0];
           var uri = decodeURIComponent(elmt["@URI"]);
           var types = elmt["@types"];
-          if(/developer/.test(types)) {
+          if(/book\/author/.test(types)) {
+            this.queryBook(uri, true);
+          } else if(/developer/.test(types)) {
             this.queryGame(uri, true);
           } else if(/director/.test(types)) {
             this.queryMovie(uri, true);
@@ -271,7 +275,7 @@ var Application = React.createClass({
         this.setState({graph: {nodes: nodes, paths: paths}, query: this.state.query});
     }.bind(this));
   },
-  queryBook: function(uri) {
+  queryBook: function(uri, isAuthor) {
 
     var nodes = [];
     var paths = [];
@@ -281,6 +285,7 @@ var Application = React.createClass({
 
     async.waterfall([
       function getAuthors(cb) {
+        if(isAuthor) { cb(null, uri); return; }
         sparqlQuery("select distinct ?Author where { " +
                 "<"+uri+"> <http://dbpedia.org/ontology/author> ?Author. " +
                 "} LIMIT 100", function(res) {
@@ -288,6 +293,7 @@ var Application = React.createClass({
         });
       },
       function extractAuthors(res, cb) {
+        if(isAuthor) { cb(null, [res]); return; }
         var authors = res.results.bindings.filter(function(elem) {
           return elem.Author.type === "uri";
         }).map(function(elem) {
@@ -298,9 +304,14 @@ var Application = React.createClass({
       function getOtherBooks(authors, cb) {
         async.each(authors, function(authorURI, cb) {
 
-          var authorNode = {name: nameFromURI(authorURI), color:"red", uri:authorURI, type:"book"};
-          nodes.push(authorNode);
-          paths.push({source: rootNode, target: authorNode});
+          if(!isAuthor) {
+            var authorNode = {name: nameFromURI(authorURI), color:"red", uri:authorURI, type:"author"};
+            nodes.push(authorNode);
+            paths.push({source: rootNode, target: authorNode});
+          }
+          else {
+            var authorNode = rootNode;
+          }
 
           sparqlQuery("select distinct ?OtherBooks where { " +
                 "?OtherBooks <http://dbpedia.org/ontology/author> <"+ authorURI +">. " +
