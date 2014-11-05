@@ -37,6 +37,8 @@ var Application = React.createClass({
     if(type && uri) {
       if(type === "musician") {
         return this.queryMusic(uri, true);
+      } else if(type === "director") {
+        return this.queryMovie(uri, true);
       } else if(type === "music") {
         return this.queryMusic(uri);
       } else if(type === "movie") {
@@ -56,7 +58,9 @@ var Application = React.createClass({
           var elmt = res.body.Resources[0];
           var uri = decodeURIComponent(elmt["@URI"]);
           var types = elmt["@types"];
-          if(/music\/artist/.test(types)) {
+          if(/director/.test(types)) {
+            this.queryMovie(uri, true);
+          } else if(/music\/artist/.test(types)) {
             this.queryMusic(uri, true);
           } else if(/music/.test(types)) {
             this.queryMusic(uri);
@@ -168,7 +172,7 @@ var Application = React.createClass({
         this.setState({graph: {nodes: nodes, paths: paths}, query: this.state.query});
     }.bind(this));
   },
-  queryMovie: function(uri) {
+  queryMovie: function(uri, isDirector) {
 
     var nodes = [];
     var paths = [];
@@ -178,6 +182,9 @@ var Application = React.createClass({
 
     async.waterfall([
       function getDirectors(cb) {
+
+        if(isDirector) { cb(null, uri); return }
+
         sparqlQuery("select distinct ?Director where { " +
                 "<"+uri+"> <http://dbpedia.org/ontology/director> ?Director. " +
                 "} LIMIT 100", function(res) {
@@ -185,6 +192,9 @@ var Application = React.createClass({
         });
       },
       function extractDirectors(res, cb) {
+
+        if(isDirector) { cb(null, [uri]); return }
+
         var directors = res.results.bindings.filter(function(elem) {
           return elem.Director.type === "uri";
         }).map(function(elem) {
@@ -217,9 +227,14 @@ var Application = React.createClass({
           function getOtherFilms() {
             async.each(directors, function(directorURI, cb) {
 
-              var directorNode = {name: nameFromURI(directorURI),  color:"red", uri:directorURI, type:"movie"};
-              nodes.push(directorNode);
-              paths.push({source: rootNode, target: directorNode});
+              if(!isDirector) {
+                var directorNode = {name: nameFromURI(directorURI),  color:"red", uri:directorURI, type:"director"};
+                nodes.push(directorNode);
+                paths.push({source: rootNode, target: directorNode});
+              }
+              else {
+                var directorNode = rootNode;
+              }
 
               sparqlQuery("select distinct ?OtherFilms where { " +
                         "?OtherFilms <http://dbpedia.org/ontology/director> <"+directorURI+">. " +
