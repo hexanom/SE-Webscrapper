@@ -103,7 +103,8 @@ var Application = React.createClass({
                 });
 
                 otherAlbums.forEach(function(albumURI) {
-                  var album = {name: nameFromURI(albumURI)};
+                  var album = {name: nameFromURI(albumURI), color:"red"};
+
                   nodes.push(album);
                   paths.push({source: artistNode, target: album});
                 });
@@ -124,7 +125,7 @@ var Application = React.createClass({
                 });
 
                 associatedArtists.forEach(function(associatedArtistURI) {
-                  var associatedArtist = {name: nameFromURI(associatedArtistURI)};
+                  var associatedArtist = {name: nameFromURI(associatedArtistURI), color:"green"};
                   nodes.push(associatedArtist);
                   paths.push({source: artistNode, target: associatedArtist});
                 });
@@ -180,7 +181,7 @@ var Application = React.createClass({
               });
 
               actors.forEach(function(actorURI) {
-                var actorNode = {name: nameFromURI(actorURI)};
+                var actorNode = {name: nameFromURI(actorURI), color:"green"};
                 nodes.push(actorNode);
                 paths.push({source: rootNode, target: actorNode});
               });
@@ -191,7 +192,7 @@ var Application = React.createClass({
           function getOtherFilms() {
             async.each(directors, function(directorURI, cb) {
 
-              var directorNode = {name: nameFromURI(directorURI)};
+              var directorNode = {name: nameFromURI(directorURI),  color:"red"};
               nodes.push(directorNode);
               paths.push({source: rootNode, target: directorNode});
 
@@ -206,7 +207,7 @@ var Application = React.createClass({
                 });
 
                 otherFilms.forEach(function(otherFilmURI) {
-                  var otherFilmNode = {name: nameFromURI(otherFilmURI)};
+                  var otherFilmNode = {name: nameFromURI(otherFilmURI), color:"blue"};
                   nodes.push(otherFilmNode);
                   paths.push({source: directorNode, target: otherFilmNode});
                 });
@@ -253,7 +254,7 @@ var Application = React.createClass({
       function getOtherBooks(authors, cb) {
         async.each(authors, function(authorURI, cb) {
 
-          var authorNode = {name: nameFromURI(authorURI)};
+          var authorNode = {name: nameFromURI(authorURI), color:"red"};
           nodes.push(authorNode);
           paths.push({source: rootNode, target: authorNode});
 
@@ -268,7 +269,7 @@ var Application = React.createClass({
             });
 
             otherBooks.forEach(function(otherBookURI) {
-              var otherBookNode = {name: nameFromURI(otherBookURI)};
+              var otherBookNode = {name: nameFromURI(otherBookURI), color:"green"};
               nodes.push(otherBookNode);
               paths.push({source: authorNode, target: otherBookNode});
             });
@@ -315,7 +316,7 @@ var Application = React.createClass({
       function getOtherGames(developers, cb) {
         async.each(developers, function(developerURI, cb) {
 
-          var devNode = {name: nameFromURI(developerURI)};
+          var devNode = {name: nameFromURI(developerURI), color:"green"};
           nodes.push(devNode);
           paths.push({source: rootNode, target: devNode});
 
@@ -330,7 +331,7 @@ var Application = React.createClass({
             });
 
             otherGames.forEach(function(otherGameURI) {
-              var otherGameNode = {name: nameFromURI(otherGameURI)};
+              var otherGameNode = {name: nameFromURI(otherGameURI), color:"red"};
               nodes.push(otherGameNode);
               paths.push({source: devNode, target: otherGameNode});
             });
