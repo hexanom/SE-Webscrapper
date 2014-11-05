@@ -22,6 +22,10 @@ function sparqlQuery(sparql, cb) {
     });
 }
 
+function nameFromURI(uri) {
+  return uri.substring(uri.lastIndexOf("/") + 1).replace(/_/g, " ");
+}
+
 var Application = React.createClass({
   getInitialState: function() {
     return {graph: {paths: [], nodes: []}};
@@ -56,7 +60,7 @@ var Application = React.createClass({
     var nodes = [];
     var paths = [];
 
-    var rootNode = {name: uri};
+    var rootNode = {name: nameFromURI(uri)};
     nodes.push(rootNode);
 
     async.waterfall([
@@ -81,7 +85,7 @@ var Application = React.createClass({
 
         async.each(artists, function(artistURI) {
 
-          var artistNode = {name: artistURI};
+          var artistNode = {name: nameFromURI(artistURI)};
           nodes.push(artistNode);
           paths.push({source: rootNode, target: artistNode});
 
@@ -99,7 +103,7 @@ var Application = React.createClass({
                 });
 
                 otherAlbums.forEach(function(albumURI) {
-                  var album = {name: albumURI};
+                  var album = {name: nameFromURI(albumURI)};
                   nodes.push(album);
                   paths.push({source: artistNode, target: album});
                 });
@@ -120,7 +124,7 @@ var Application = React.createClass({
                 });
 
                 associatedArtists.forEach(function(associatedArtistURI) {
-                  var associatedArtist = {name: associatedArtistURI};
+                  var associatedArtist = {name: nameFromURI(associatedArtistURI)};
                   nodes.push(associatedArtist);
                   paths.push({source: artistNode, target: associatedArtist});
                 });
@@ -136,14 +140,14 @@ var Application = React.createClass({
         console.error(err);
       else 
         this.setState({graph: {nodes: nodes, paths: paths}}); 
-    });
+    }.bind(this));
   },
   queryMovie: function(uri) {
 
     var nodes = [];
     var paths = [];
 
-    var rootNode = {name: uri};
+    var rootNode = {name: nameFromURI(uri)};
     nodes.push(rootNode);
 
     async.waterfall([
@@ -176,7 +180,7 @@ var Application = React.createClass({
               });
 
               actors.forEach(function(actorURI) {
-                var actorNode = {name: actorURI};
+                var actorNode = {name: nameFromURI(actorURI)};
                 nodes.push(actorNode);
                 paths.push({source: rootNode, target: actorNode});
               });
@@ -187,7 +191,7 @@ var Application = React.createClass({
           function getOtherFilms() {
             async.each(directors, function(directorURI, cb) {
 
-              var directorNode = {name: directorURI};
+              var directorNode = {name: nameFromURI(directorURI)};
               nodes.push(directorNode);
               paths.push({source: rootNode, target: directorNode});
 
@@ -202,7 +206,7 @@ var Application = React.createClass({
                 });
 
                 otherFilms.forEach(function(otherFilmURI) {
-                  var otherFilmNode = {name: otherFilmURI};
+                  var otherFilmNode = {name: nameFromURI(otherFilmURI)};
                   nodes.push(otherFilmNode);
                   paths.push({source: directorNode, target: otherFilmNode});
                 });
@@ -220,14 +224,14 @@ var Application = React.createClass({
         console.error(err);
       else 
         this.setState({graph: {nodes: nodes, paths: paths}}); 
-    });
+    }.bind(this));
   },
   queryBook: function(uri) {
 
     var nodes = [];
     var paths = [];
 
-    var rootNode = {name: uri};
+    var rootNode = {name: nameFromURI(uri)};
     nodes.push(rootNode);
 
     async.waterfall([
@@ -249,7 +253,7 @@ var Application = React.createClass({
       function getOtherBooks(authors, cb) {
         async.each(authors, function(authorURI, cb) {
 
-          var authorNode = {name: authorURI};
+          var authorNode = {name: nameFromURI(authorURI)};
           nodes.push(authorNode);
           paths.push({source: rootNode, target: authorNode});
 
@@ -264,7 +268,7 @@ var Application = React.createClass({
             });
 
             otherBooks.forEach(function(otherBookURI) {
-              var otherBookNode = {name: otherBookURI};
+              var otherBookNode = {name: nameFromURI(otherBookURI)};
               nodes.push(otherBookNode);
               paths.push({source: authorNode, target: otherBookNode});
             });
@@ -281,7 +285,7 @@ var Application = React.createClass({
         console.error(err);
       else 
         this.setState({graph: {nodes: nodes, paths: paths}}); 
-    });
+    }.bind(this));
 
   },
   queryGame: function(uri) {
@@ -289,7 +293,7 @@ var Application = React.createClass({
     var nodes = [];
     var paths = [];
 
-    var rootNode = {name: uri};
+    var rootNode = {name: nameFromURI(uri)};
     nodes.push(rootNode);
 
     async.waterfall([
@@ -311,7 +315,7 @@ var Application = React.createClass({
       function getOtherGames(developers, cb) {
         async.each(developers, function(developerURI, cb) {
 
-          var devNode = {name: developerURI};
+          var devNode = {name: nameFromURI(developerURI)};
           nodes.push(devNode);
           paths.push({source: rootNode, target: devNode});
 
@@ -326,7 +330,7 @@ var Application = React.createClass({
             });
 
             otherGames.forEach(function(otherGameURI) {
-              var otherGameNode = {name: otherGameURI};
+              var otherGameNode = {name: nameFromURI(otherGameURI)};
               nodes.push(otherGameNode);
               paths.push({source: devNode, target: otherGameNode});
             });
@@ -343,7 +347,7 @@ var Application = React.createClass({
         console.error(err);
       else 
         this.setState({graph: {nodes: nodes, paths: paths}}); 
-    });
+    }.bind(this));
   },
   render: function() {
     return (
