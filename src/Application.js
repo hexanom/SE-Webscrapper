@@ -49,47 +49,96 @@ var Application = React.createClass({
       }.bind(this));
   },
   queryMusic: function(uri) {
-    sparqlQuery("select distinct ?Artist where { " +
-                "<"+uri+"> <http://dbpedia.org/property/artist> ?Artist. " +
-                "?Album <http://dbpedia.org/property/artist> ?Artist. " +
-                "} LIMIT 100", function(res) {
 
+    var nodes = [];
+    var paths = [];
+
+    var rootNode = {name: uri};
+    nodes.push(rootNode);
+
+    async.waterfall([
+    function getArtists(cb) {
+      sparqlQuery("select distinct ?Artist where { " +
+                  "<"+uri+"> <http://dbpedia.org/property/artist> ?Artist. " +
+                  "?Album <http://dbpedia.org/property/artist> ?Artist. " +
+                  "} LIMIT 100", function(res) {
+        cb(null, res);
+      });
+    },
+    function extractArtists(res, cb) {
       var artists = res.results.bindings.filter(function(elem) {
         return elem.Artist.type === "uri";
       }).map(function(elem) {
         return elem.Artist.value;
       });
-      var artistURI = artists[0];
 
-      for(var i = 0; i < artists.length; i++) {
+      cb(null, artists);
+    },
+    function artistsAlbumsAndAssociatedArtists(artists, cb) {
 
-        var artistURI = artists[i];
+      async.each(artists, function(artistURI) {
 
-        sparqlQuery("select distinct ?OtherAlbums where { " +
-                    "?OtherAlbums <http://dbpedia.org/property/artist> <"+artistURI+">. " +
-                    "?OtherAlbums a <http://dbpedia.org/ontology/Album>. " +
-                    "} LIMIT 100", function(res) {
+        var artistNode = {name: artistURI};
+        nodes.push(artistNode);
+        paths.push({source: rootNode, target: artistNode});
 
-          var otherAlbums = res.results.bindings.filter(function(elem) {
-            return elem.OtherAlbums.type === "uri";
-          }).map(function(elem) {
-            return elem.OtherAlbums.value;
-          });
+        async.parallel([
+          function artistsAlbums(cb){
+            sparqlQuery("select distinct ?OtherAlbums where { " +
+                        "?OtherAlbums <http://dbpedia.org/property/artist> <"+artistURI+">. " +
+                        "?OtherAlbums a <http://dbpedia.org/ontology/Album>. " +
+                        "} LIMIT 100", function(res) {
 
-          sparqlQuery("select distinct ?AssociatedArtist where { " +
-                      "<"+artistURI+"> <http://dbpedia.org/ontology/associatedBand> ?AssociatedArtist. " +
-                      "} LIMIT 100", function(res) {
+              var otherAlbums = res.results.bindings.filter(function(elem) {
+                return elem.OtherAlbums.type === "uri";
+              }).map(function(elem) {
+                return elem.OtherAlbums.value;
+              });
 
-            var associatedArtists = res.results.bindings.filter(function(elem) {
-              return elem.AssociatedArtist.type === "uri";
-            }).map(function(elem) {
-              return elem.AssociatedArtist.value;
+              otherAlbums.forEach(function(albumURI) {
+                var album = {name: albumURI};
+                nodes.push(album);
+                paths.push({source: artistNode, target: album});
+              });
+
+              cb(null);
+
             });
+          },
+          function associatedArtist(cb) {
+            sparqlQuery("select distinct ?AssociatedArtist where { " +
+                        "<"+artistURI+"> <http://dbpedia.org/ontology/associatedBand> ?AssociatedArtist. " +
+                        "} LIMIT 100", function(res) {
 
-          }.bind(this));
-        }.bind(this));
-      }
-    }.bind(this));
+              var associatedArtists = res.results.bindings.filter(function(elem) {
+                return elem.AssociatedArtist.type === "uri";
+              }).map(function(elem) {
+                return elem.AssociatedArtist.value;
+              });
+
+              associatedArtists.forEach(function(associatedArtistURI) {
+                var associatedArtist = {name: associatedArtistURI};
+                nodes.push(associatedArtist);
+                paths.push({source: artistNode, target: associatedArtist});
+              });
+              
+              cb(null);
+            });
+          }
+        ], function(err) {
+          cb(null);
+        });
+      }, function(err) {
+        cb(null);
+      });
+    }
+    ], function (err) {
+      debugger;
+      if(err)
+        console.error(err);
+      else 
+        this.setState({graph: {nodes: nodes, paths: paths}}); 
+    });
   },
   queryMovie: function(uri) {
     sparqlQuery("select distinct ?Director where { " +
